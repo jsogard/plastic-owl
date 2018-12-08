@@ -1,0 +1,16 @@
+{% load static %}
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="{% static "plastic/login.css" %}">
+
+<body>
+	<form>
+		<label for='username'>Username</label><br/>
+		<input type='text' name='username'/><br/>
+		<label for='password'>Password</label><br/>
+		<input type='password' name='password' /><br/>
+		<input type='submit' value='Submit' id='submit'/>
+	</form>
+</body>
+
+<script src="{% static "plastic/login.js" %}" ></script>
