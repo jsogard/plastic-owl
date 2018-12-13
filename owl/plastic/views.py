@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseBadRequest
-
+from .dummy import get_library_data
 
 
 # Create your views here.
@@ -26,4 +26,9 @@ def login(request):
 			# print('bad login')
 			return HttpResponseBadRequest('Bad login')
 		
-	return None
+	return Non
+
+def library(request):
+	if request.method == 'GET':
+		return render(request, 'plastic/library.html', {})
+

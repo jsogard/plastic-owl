@@ -1,0 +1,16 @@
+
+div.song {
+	text-align: center;
+	border-radius: 2%;
+	padding: 10px;
+}
+
+div.song:hover {
+	background: #00000009;
+	cursor: pointer;
+}
+
+div#content {
+	margin: auto;
+}
+
