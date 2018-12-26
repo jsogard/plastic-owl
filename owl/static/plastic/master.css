@@ -4,3 +4,8 @@ body {
 	font-style: italic;
 }
 
+#content {
+	margin: auto;
+	margin-top: 80px;
+}
+

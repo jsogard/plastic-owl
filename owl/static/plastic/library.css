@@ -10,10 +10,6 @@ div.song:hover {
 	cursor: pointer;
 }
 
-div#content {
-	margin: auto;
-}
-
 input[type=search] {
 	border: 0;
 	border-bottom: 1px solid #ccc;

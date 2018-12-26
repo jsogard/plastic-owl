@@ -1,0 +1,13 @@
+{% load static %}
+<head>
+	{% block head %}{% endblock %}
+	<title>{% block title %}{% endblock %}</title>
+	<link rel='stylesheet' type='text/css' href='{% static 'plastic/master.css' %}'/>
+</head>
+<body>
+
+	<div id='content' class='col-10'>
+		{% block content %}{% endblock %}
+	</div>
+</body>
+{% block scripts %}{% endblock %}

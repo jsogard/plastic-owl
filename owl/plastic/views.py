@@ -26,7 +26,7 @@ def login(request):
 			# print('bad login')
 			return HttpResponseBadRequest('Bad login')
 		
-	return Non
+	return None
 
 def library(request):
 	if request.method == 'GET':

@@ -1,5 +1,6 @@
 $(document).ready(function(){
 
+	let TABLE = null;
 	let LIBRARY = [];
 	const STYLE = { LIST: 'LIST', GRID: 'GRID' };
 	let POPPER = null;
@@ -9,29 +10,15 @@ $(document).ready(function(){
 			return '<span class=\'td-content\'>' + content + '</span>';
 		};
 
-		this.order = _(json.order) + '<span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span>';
-		this.title = _(json.title) + '<span class="glyphicon glyphicon-option-vertical float-right" aria-hidden="true"></span>';
+		const play_button = '<span class="glyphicon glyphicon-play-circle play-button" aria-hidden="true"></span>';
+		const ellipsis = '<span class="glyphicon glyphicon-option-vertical float-right ellipsis" aria-hidden="true"></span>';
+
+		this.order = _(json.order) + play_button;
+		this.title = _(json.title) + ellipsis;
 		this.artist = _(json.artist);
 		this.added = _(json.added);
 		this.length = _(json.length);
 	}
-
-	// const get_song_dom_list = function(song) {
-
-	// 	return $('<tr></tr>')
-	// 		.addClass("song")
-	// 		.append($('<td></td>'))
-	// 		.append($('<td></td>')
-	// 			.text(song.title))
-	// 		.append($('<td></td>')
-	// 			.text(song.artist))
-	// 		.append($('<td></td>')
-	// 			.text(0))
-	// 		.append($('<td></td>'))
-	// 		.append($('<td></td>')
-	// 			.text(0))
-	// 		;
-	// }
 
 	const get_song_dom_grid = function(song) {
 
@@ -61,7 +48,7 @@ $(document).ready(function(){
 
 	const populate_library_doms = function(style, sort, order) {
 		
-		$('table#library-table').DataTable({
+		TABLE = $('table#library-table').DataTable({
 			data: LIBRARY,
 			columns: [
 				{ data: 'order' },
@@ -73,103 +60,104 @@ $(document).ready(function(){
 		});
 	}
 
-	$('.dropdown-menu').hide();
-	let SELECTED = null;
+	const play_now = function(callback) {
+		callback({ successful: true, message: 'Succeeded to play now' })
+	}
 
-	get_all_songs(function callback() {
-		const $dropdown = $('.dropdown-menu');
+	const play_next = function(callback) {
+		callback({ successful: false, message: 'Failed to play next' })
+	}
+
+	const add_queue = function(callback) {
+		callback({ successful: false, message: 'Failed to add to queue' })
+	}
+
+	const dropdown_functionality = function($dropdown) {
 		let popper = null;
+		let $selectedRow = null;
 
 		const timeoutHideMenu = function() {
 			const timeout = setTimeout(function() {
-				$dropdown.hide();
+				if(popper) $dropdown.hide();
 				console.log('dropdown timeout fulfilled');
-			}, 50);
+			}, 500);
 			$dropdown.data('timeout', timeout);
-			console.log('dropdown timeout started with id ' + timeout);
 		};
 
 		const cancelTimeout = function() {
 			const timeout = $dropdown.data('timeout');
 			clearTimeout(timeout);
-			console.log('dropdwon timeout cancelled with id ' + timeout);
 		};
 
-		$dropdown.hover(cancelTimeout, function() { cancelTimeout(); timeoutHideMenu(); });
-
-		$('tbody tr').click(function() {
-			$('tbody tr.selected').removeClass('selected');
-			$(this).addClass('selected');
-			console.log('dropdonw shown, selected class put on row');
-		}).mouseleave(function() {
-			if($(this).hasClass('selected')) {
-				cancelTimeout();
-				console.log('mouse leave for selected row');
-				timeoutHideMenu();
-			}
-		});
-
-		$('tbody tr td span.glyphicon-option-vertical').click(function() {
+		$('tbody').on('click', 'span.ellipsis', function() {
+			// display dropdown on ellipsis click
 			popper = new Popper($(this), $dropdown, {});
 			$dropdown.show();
+		}).on('mouseenter', 'tr', function() {
+			// set mouseover row as selected
+			$selectedRow = $(this);
+			$selectedRow.addClass('selected');
+		}).on('mouseleave', 'tr.selected', function() {
+			// remove selected row
+			$(this).removeClass('selected');
+			cancelTimeout();
+			timeoutHideMenu();
 		});
 
-		$('#dropdown > *').click(function() {
-			console.log($(this));
-			console.log('clicked the dropdown');
-			if(popper) popper.destroy();
+		$dropdown.on('mouseenter', function() {
+			cancelTimeout();
+		}).on('mouseleave', function() {
+			cancelTimeout();
+			timeoutHideMenu();
+		})
+		.on('click', '.dropdown-item', function() {
+			if(popper) $dropdown.hide();
+			const data = TABLE.row($selectedRow).data();
+			let result = null;
+
+			const callback = function(data) {
+				const $toast = $('<div></div>')
+						.addClass('alert')
+						.addClass(data.successful ? 'alert-success' : 'alert-danger')
+						.append(data.message);
+				$('#toaster').append($toast);
+				setTimeout(function() {
+					$toast.fadeOut('slow');
+				}, 7000)
+			}
+
+			switch($(this).attr('id')){
+				case 'play-next':
+					result = play_next(callback);
+					break;
+				case 'play-now':
+					result = play_now(callback);
+					break;
+				case 'add-queue':
+					result = add_queue(callback);
+					break;
+			}
+
+
 		})
 
+		// $dropdown.hover(cancelTimeout, function() { cancelTimeout(); timeoutHideMenu(); });
+	}
 
-		// when i click the ellipse, show the menu and set row as selected
+	$('.dropdown-menu').hide();
 
-		// when i move off of the selected row it sets a timer to fade out the menu $id
-
-		// when i move into the menu it cancels the timer with $id
-
-		// when i move off of the menu it starts the same timer $id
-
-
-		// const mouseIn = function () {
-		// 	if(POPPER) {
-
-		// 		clearTimeout(dropdown.data('timeoutId'));
-		// 		console.log('clear timeout: ' + dropdown.data('timeoutId'));
-		// 	}
-		// }, mouseOut = function () {
-		// 	if(POPPER) {
-
-		// 		console.log('mosueout');
-		// 		let timeoutId = setTimeout(function() {
-		// 			dropdown.hide();
-		// 		}, 1000)
-		// 		dropdown.data('timeoutId', timeoutId);
-		// 		console.log('attach timeout: ' + timeoutId);
-		// 	}
-		// };
-
-
-		// $('tbody tr').click(function() {
-
-		// 	if(SELECTED) SELECTED.removeClass('selected');
-		// 	SELECTED = $(this);
-		// 	$(this).addClass('selected');
-		// 	// $(this).mouseIn(mouseIn);
-		// 	$(this).mouseleave(mouseOut);
-		// })
+	get_all_songs(function callback() {
+		const $dropdown = $('.dropdown-menu');
 		
-		// $('tbody tr td:nth-child(2) span:not(.td-content)').click(function() {
+		dropdown_functionality($dropdown);
+		
 
-		// 	POPPER = new Popper(
-		// 		this,
-		// 		dropdown,
-		// 		{ placement: 'auto-end' });
-		// 	dropdown.show();
-		// });
+		// $('tbody').on('click', 'tr', function() {
+		// 	var data = TABLE.row(this).data();
+		// 	alert($(data['title']).text());
+		// }).on('click', 'span', function() {
 
-
-		// $('.dropdown-menu').mouseleave(mouseOut);
-		// $('.dropdown-menu').mouseenter(mouseIn);
+		// })
 
 
 
